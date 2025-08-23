@@ -5,7 +5,7 @@ use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Symfony\Component\DomCrawler\Crawler;
 
-class Vega extends Parser
+class Vega extends Parser implements ParserInterface
 {
     private $urls = [
         'https://vega.am/am/aowdio-video-tekhnika/herhowstatsowytsner/',
@@ -16,11 +16,9 @@ class Vega extends Parser
     ];
     private $mans = "?mfp=manufacturers[124,80,150,17,326]";
 
-    static function run()
-    {
-        $parser = new static();
-        $parser->start();
-    }
+    public string $name = "vega";
+
+
 
     function start()
     {

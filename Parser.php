@@ -10,7 +10,10 @@ class Parser
 {
     private Client $client;
     private Logger $logger;
-    private $base_path = "htmls/";
+    private string $base_path = "htmls/";
+
+    public string $name = "";
+
     function __construct()
     {
         $this->logger = new Logger("parser");
@@ -23,6 +26,12 @@ class Parser
     {
         $response = $this->client->request('GET', $url);
         return new Crawler($response->getBody()->getContents());
+    }
+
+    function getJson($url,$method = 'GET',$payload = [])
+    {
+        $response = $this->client->request($method, $url,$payload);
+        return json_decode($response->getBody()->getContents(), true);
     }
 
     function saveHtml($url,$path)
@@ -44,7 +53,10 @@ class Parser
 
     function checkDir($path)
     {
-        $path = $this->base_path.$path;
+        if(!str_ends_with($this->name,"/")){
+            $this->name .= "/";
+        }
+        $path = $this->base_path.$this->name.$path;
         $e = explode('/', $path);
         $file_name = array_pop($e);
         $path = "";
@@ -55,7 +67,12 @@ class Parser
             }
         }
         $path .= $file_name;
-        $this->log($path);
         return $path;
+    }
+
+    static function run()
+    {
+        $parser = new static();
+        $parser->start();
     }
 }
