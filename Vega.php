@@ -37,7 +37,6 @@ class Vega extends Parser
 
     function paginate($url)
     {
-        $url = $url.$this->mans;
         $crawler = $this->getHtml($url);
         if($crawler->filter('.category-list')->count() == 1){
             $category_urls = [];
@@ -51,6 +50,7 @@ class Vega extends Parser
             }
             return $products_urls;
         }
+        $url = $url.$this->mans;
         $pages = [$url];
         try{
             $href = $crawler->filter('.pagination')->first()->filter('li')->last()->filter('a')->first()->attr('href');
