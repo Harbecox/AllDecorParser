@@ -7,8 +7,13 @@ use Symfony\Component\DomCrawler\Crawler;
 
 class Vega extends Parser
 {
+    private $mans = "?mfp=manufacturers[124,80,150,17,326]";
     private $urls = [
-        'https://vega.am/am/aowdio-video-tekhnika/herhowstatsowytsner?mfp=manufacturers[124]&limit=20'
+        'https://vega.am/am/aowdio-video-tekhnika/herhowstatsowytsner/',
+        'https://vega.am/am/geghetskowtyown-ew-khnamk/',
+        'https://vega.am/am/khoshor-kentsaghayin/',
+        'https://vega.am/am/khohanots-ev-town/',
+        'https://vega.am/am/kentsaghayin-tekhnika/',
     ];
 
     static function run()
@@ -32,7 +37,20 @@ class Vega extends Parser
 
     function paginate($url)
     {
+        $url = $url.$this->mans;
         $crawler = $this->getHtml($url);
+        if($crawler->filter('.category-list')->count() == 1){
+            $category_urls = [];
+            $crawler->filter('.category-list')->filter('a')->each(function (Crawler $node, $i) use(&$category_urls){
+                $category_urls[] = $node->attr('href');
+            });
+            $category_urls = array_unique($category_urls);
+            $products_urls = [];
+            foreach ($category_urls as $category_url) {
+                $products_urls = array_merge($products_urls,$this->paginate($category_url));
+            }
+            return $products_urls;
+        }
         $pages = [$url];
         try{
             $href = $crawler->filter('.pagination')->first()->filter('li')->last()->filter('a')->first()->attr('href');
