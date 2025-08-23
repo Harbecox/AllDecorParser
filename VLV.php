@@ -22,7 +22,7 @@ class VLV extends Parser implements ParserInterface
     function start()
     {
         $this->urls = json_decode(file_get_contents("vlv_cateogry_slug.json"), true);
-        //$this->categories();
+        $this->categories();
         foreach ($this->urls as $sku){
             $json = "htmls/vlv/".$sku.".json";
             $path = $sku."/";
