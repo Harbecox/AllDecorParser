@@ -1,0 +1,61 @@
+<?php
+
+use GuzzleHttp\Client;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Symfony\Component\DomCrawler\Crawler;
+
+require 'vendor/autoload.php';
+class Parser
+{
+    private Client $client;
+    private Logger $logger;
+    private $base_path = "htmls/";
+    function __construct()
+    {
+        $this->logger = new Logger("parser");
+        $stream_handler = new StreamHandler("php://stdout");
+        $this->logger->pushHandler($stream_handler);
+        $this->client = new Client();
+    }
+
+    function getHtml($url): Crawler
+    {
+        $response = $this->client->request('GET', $url);
+        return new Crawler($response->getBody()->getContents());
+    }
+
+    function saveHtml($url,$path)
+    {
+        $path = $this->checkDir($path);
+        $response = $this->client->request('GET', $url);
+        file_put_contents($path, $response->getBody());
+    }
+
+    public function log($text){
+        $this->logger->info($text);
+    }
+
+    function saveJson($arr,$path)
+    {
+        $path = $this->checkDir($path);
+        file_put_contents($path, json_encode($arr, 256));
+    }
+
+    function checkDir($path)
+    {
+        $path = $this->base_path.$path;
+        $e = explode('/', $path);
+        $file_name = array_pop($e);
+        $path = "";
+        foreach ($e as $dir) {
+            $path .= $dir . '/';
+            if(!is_dir($path)) {
+                mkdir($path);
+            }
+        }
+        $path .= $file_name;
+        $this->log($path);
+        return $path;
+    }
+}
