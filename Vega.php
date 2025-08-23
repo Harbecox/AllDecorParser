@@ -7,7 +7,6 @@ use Symfony\Component\DomCrawler\Crawler;
 
 class Vega extends Parser
 {
-    private $mans = "?mfp=manufacturers[124,80,150,17,326]";
     private $urls = [
         'https://vega.am/am/aowdio-video-tekhnika/herhowstatsowytsner/',
         'https://vega.am/am/geghetskowtyown-ew-khnamk/',
@@ -15,6 +14,7 @@ class Vega extends Parser
         'https://vega.am/am/khohanots-ev-town/',
         'https://vega.am/am/kentsaghayin-tekhnika/',
     ];
+    private $mans = "?mfp=manufacturers[124,80,150,17,326]";
 
     static function run()
     {
@@ -37,6 +37,7 @@ class Vega extends Parser
 
     function paginate($url)
     {
+        $this->log($url);
         $crawler = $this->getHtml($url);
         if($crawler->filter('.category-list')->count() == 1){
             $category_urls = [];
@@ -47,6 +48,7 @@ class Vega extends Parser
             $products_urls = [];
             foreach ($category_urls as $category_url) {
                 $products_urls = array_merge($products_urls,$this->paginate($category_url));
+                $this->log('count = '.count($products_urls));
             }
             return $products_urls;
         }
@@ -72,7 +74,6 @@ class Vega extends Parser
         }
         $products_urls = [];
         foreach ($pages as $page) {
-            $this->log($page);
             $crawler = $this->getHtml($page);
             $crawler->filter('.product-grid')->first()->filter('.product')->each(function (Crawler $node) use (&$products_urls) {
                 $products_urls[] = $node->filter('.right')->filter('a')->attr('href');
