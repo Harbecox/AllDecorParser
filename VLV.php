@@ -28,7 +28,7 @@ class VLV extends Parser implements ParserInterface
             $path = $sku."/";
             $arr = json_decode(file_get_contents($json), true);
             foreach ($arr as $k => $id){
-                $this->log($sku."\t".$id."\t\t".$i.'/'.count($this->urls)."\t\t".$k.'/'.count($arr));
+                $this->log($sku."\t".$id."\t\t".($i + 1).'/'.count($this->urls)."\t\t".($k + 1).'/'.count($arr));
                 $json = $this->getJson('https://vlv.am/api/product-info/'.$id,"POST");
                 $this->saveJson($json,$path.$id.'.json');;
             }
