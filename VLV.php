@@ -22,13 +22,13 @@ class VLV extends Parser implements ParserInterface
     function start()
     {
         $this->urls = json_decode(file_get_contents("vlv_cateogry_slug.json"), true);
-        $this->categories();
-        foreach ($this->urls as $sku){
+//        $this->categories();
+        foreach ($this->urls as $i => $sku){
             $json = "htmls/vlv/".$sku.".json";
             $path = $sku."/";
             $arr = json_decode(file_get_contents($json), true);
-            foreach ($arr as $id){
-                $this->log($sku."\t".$id);
+            foreach ($arr as $k => $id){
+                $this->log($sku."\t".$id."\t\t".$i.'/'.count($this->urls)."\t\t".$k.'/'.count($arr));
                 $json = $this->getJson('https://vlv.am/api/product-info/'.$id,"POST");
                 $this->saveJson($json,$path.$id.'.json');;
             }
