@@ -19,7 +19,6 @@ class Vega extends Parser implements ParserInterface
     public string $name = "vega";
 
 
-
     function start()
     {
         foreach ($this->urls as $k => $url) {
