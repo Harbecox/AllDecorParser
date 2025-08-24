@@ -1,6 +1,7 @@
 <?php
 
 require 'Parser.php';
+require 'ParserInterface.php';
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Symfony\Component\DomCrawler\Crawler;
@@ -20,6 +21,68 @@ class Vega extends Parser implements ParserInterface
 
 
     function start()
+    {
+//        $this->getProductHtmls();
+        $products = [];
+        $dir = "htmls/vega/";
+        $htmls = [];
+        $files = scandir($dir);
+        foreach ($files as $file){
+            if($file != "." && $file != ".." && is_dir($dir.$file)){
+                foreach (scandir($dir.$file) as $f){
+                    if(is_file($dir.$file."/".$f) && str_ends_with($f,".html")){
+                        $htmls[] = $dir.$file."/".$f;
+                    }
+                }
+            }
+        }
+        foreach ($htmls as $k => $html){
+            $this->log(($k + 1)." of ".count($htmls));
+            $product = [];
+            $crawler = new Crawler(file_get_contents($html));
+            $lis = $crawler->filter('.breadcrumb')->filter('li')
+                ->each(function (Crawler $node){
+                    return $node->text();
+                });
+            $product['name'] = array_pop($lis);
+            $product['cateogory'] = $lis;
+            $product['images'] = $crawler->filter('.product-image-left')->first()->filter('a')
+                ->each(function (Crawler $node){
+                    return $node->attr('href');
+                });
+            $product['images'] = array_unique($product['images']);
+            $price_old = $crawler->filter('#content')->filter('#price-old');
+            if($price_old->count() > 0){
+                $product['price_old'] = $price_old->first()->text();
+            }
+            $product['price'] = $crawler->filter('#content')
+                ->filter('#price-special')->text();
+            $attributes = [];
+            $attr_group = "";
+            $crawler->filter('.attribute')->filter('tr')
+                ->each(function (Crawler $tr) use(&$attributes,&$attr_group){
+                    $tds = $tr->filter('td');
+                    if($tds->count() == 1){
+                        $attr_group = $tds->first()->text();
+                    }else{
+                        $attributes[$attr_group][$tds->first()->text()] = $tds->last()->text();
+                    }
+                });
+            $product['attributes'] = $attributes;
+            $product['url'] = $crawler->filter('link[rel="canonical"]')->first()->attr('href');
+            $u = explode('/', $product['url']);
+            $product['sku'] = str_replace('.html','',end($u));
+            try {
+                $this->saveimages($product['sku'],$product['images']);
+            }catch (\Exception $e){
+                $this->error($e->getMessage());
+            }
+            $products[] = $product;
+        }
+        $this->saveJson($products,"products.json");
+    }
+
+    function getProductHtmls()
     {
         foreach ($this->urls as $k => $url) {
             $products = $this->paginate($url);

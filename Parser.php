@@ -45,6 +45,11 @@ class Parser
         $this->logger->info($text);
     }
 
+    public function error($text)
+    {
+        $this->logger->error($text);
+    }
+
     function saveJson($arr,$path)
     {
         $path = $this->checkDir($path);
@@ -68,6 +73,14 @@ class Parser
         }
         $path .= $file_name;
         return $path;
+    }
+
+    function saveimages($sku,$images)
+    {
+        $path = "images/".$sku."/";
+        foreach ($images as $image) {
+            $this->saveHtml($image,$path.basename($image));
+        }
     }
 
     static function run()
